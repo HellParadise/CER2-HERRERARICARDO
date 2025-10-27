@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ event.event_name }} - Smart Events{% endblock %}
+
+{% block extra_css %}
+<style>
+  .event-detail-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 60px 0;
+    margin-bottom: 40px;
+    position: relative;
+  }
+  
+  .event-detail-header.featured {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #667eea 100%);
+  }
+  
+  .featured-header-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .event-main-image {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    margin-bottom: 30px;
+  }
+  
+  .detail-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 30px;
+    margin-bottom: 30px;
+  }
+  
+  .info-item {
+    padding: 15px;
+    margin: 10px 0;
+    background: #f8f9fa;
+    border-left: 4px solid #667eea;
+    border-radius: 8px;
+  }
+  
+  .info-item i {
+    color: #667eea;
+    font-size: 1.5rem;
+    margin-right: 15px;
+    width: 30px;
+  }
+  
+  .price-tag {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #28a745;
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin: 20px 0;
+  }
+  
+  .capacity-box {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .capacity-box h3 {
+    margin: 0;
+    font-size: 2rem;
+  }
+  
+  .btn-join-event {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 10px;
+    margin: 10px 0;
+  }
+  
+  .attendee-badge {
+    display: inline-block;
+    padding: 8px 15px;
+    background: #667eea;
+    color: white;
+    border-radius: 20px;
+    margin: 5px;
+    font-size: 0.9rem;
+  }
+  
+  .back-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+  
+  .back-link:hover {
+    color: #ffd700;
+    transform: translateX(-5px);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="event-detail-header {% if event.is_featured %}featured{% endif %}">
+  <div class="container">
+    <a href="{% url 'index' %}" class="back-link">
+      <i class="bi bi-arrow-left"></i> Volver a todos los eventos
+    </a>
+    {% if event.is_featured %}
+    <div class="featured-header-badge">
+      <i class="bi bi-star-fill"></i> EVENTO DESTACADO
+    </div>
+    {% endif %}
+    <h1 class="display-4 fw-bold mt-3">{{ event.event_name }}</h1>
+    <p class="lead">{{ event.description }}</p>
+  </div>
+</div>
+
+<div class="container mb-5">
+  {% if event.image_base64 %}
+  <img src="{{ event.image_base64 }}" alt="{{ event.event_name }}" class="event-main-image">
+  {% endif %}
+  
+  <div class="row">
+    <!-- Columna izquierda: Información del evento -->
+    <div class="col-lg-8">
+      <div class="detail-card">
+        <h2 class="mb-4"><i class="bi bi-info-circle-fill"></i> Detalles del Evento</h2>
+        
+        <div class="info-item">
+          <i class="bi bi-calendar-event"></i>
+          <strong>Fecha:</strong> {{ event.event_date|date:"l, d \d\e F \d\e Y" }}
+        </div>
+        
+        <div class="info-item">
+          <i class="bi bi-clock-fill"></i>
+          <strong>Horario:</strong> {{ event.starts_at|time:"H:i" }} - {{ event.ends_at|time:"H:i" }}
+        </div>
+        
+        <div class="info-item">
+          <i class="bi bi-geo-alt-fill"></i>
+          <strong>Ubicación:</strong> {{ event.location }}
+        </div>
+        
+        <div class="info-item">
+          <i class="bi bi-calendar-plus"></i>
+          <strong>Publicado:</strong> {{ event.pub_date|date:"d/m/Y H:i" }}
+        </div>
+      </div>
+    </div>
+    
+    <!-- Columna derecha: Precio y acción -->
+    <div class="col-lg-4">
+      <div class="detail-card">
+        <h3 class="text-center mb-3"><i class="bi bi-ticket-detailed"></i> Inscripción</h3>
+        
+        <div class="price-tag">
+          {% if event.price == 0 %}
+            <i class="bi bi-gift-fill"></i><br>
+            ¡GRATIS!
+          {% else %}
+            ${{ event.price }}
+          {% endif %}
+        </div>
+        
+        <!-- Capacidad -->
+        <div class="capacity-box">
+          <i class="bi bi-people"></i>
+          {% if event.capacity %}
+            <h3>{{ event.attendees.count }}/{{ event.capacity }}</h3>
+            <p class="mb-0">
+              {% if event.remaining_slots > 0 %}
+                {{ event.remaining_slots }} lugares disponibles
+              {% else %}
+                ¡Evento completo!
+              {% endif %}
+            </p>
+          {% else %}
+            <h3><i class="bi bi-infinity"></i></h3>
+            <p class="mb-0">Capacidad ilimitada</p>
+          {% endif %}
+        </div>
+        
+        <!-- Botón de acción -->
+        {% if user.is_authenticated %}
+          {% if user in event.attendees.all %}
+            <div class="d-grid gap-2">
+              <button class="btn btn-success btn-join-event" disabled>
+                <i class="bi bi-check-circle-fill"></i> Ya estás inscrito
+              </button>
+              <form method="POST" action="{% url 'leave_event' event.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger w-100" onclick="return confirm('¿Estás seguro de que quieres desinscribirte de este evento?');">
+                  <i class="bi bi-x-circle"></i> Desinscribirme
+                </button>
+              </form>
+            </div>
+          {% elif event.remaining_slots == 0 and event.capacity %}
+            <button class="btn btn-secondary btn-join-event" disabled>
+              <i class="bi bi-x-circle"></i> Evento Completo
+            </button>
+          {% else %}
+            <form method="POST" action="{% url 'join_event' event.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-primary btn-join-event">
+                <i class="bi bi-calendar-check"></i> Inscribirme
+              </button>
+            </form>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-warning btn-join-event">
+            <i class="bi bi-box-arrow-in-right"></i> Inicia sesión para inscribirte
+          </a>
+        {% endif %}
+        
+        <div class="alert alert-info mt-3" role="alert">
+          <i class="bi bi-info-circle"></i>
+          <small>La inscripción es rápida y segura</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

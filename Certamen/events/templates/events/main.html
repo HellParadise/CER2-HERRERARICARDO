@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Smart Events - Tu agenda estudiantil{% endblock %}
+
+{% block extra_css %}
+<style>
+  .hero-size {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    padding: 60px 0;
+  }
+  
+  .bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .bg::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: float 20s linear infinite;
+  }
+  
+  @keyframes float {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-50px, -50px); }
+  }
+  
+  .hero-content {
+    position: relative;
+    z-index: 2;
+  }
+  
+  .hero-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+  
+  .hero-description {
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 30px;
+  }
+  
+  .hero-buttons .btn {
+    padding: 15px 40px;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+  }
+  
+  .hero-buttons .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  }
+  
+  .countdown-container {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    padding: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+  
+  .countdown-title {
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  
+  .event-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    margin-bottom: 25px;
+  }
+  
+  .countdown-timer {
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+    margin: 30px 0;
+  }
+  
+  .countdown-item {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 20px;
+    border-radius: 15px;
+    min-width: 90px;
+    text-align: center;
+  }
+  
+  .countdown-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+  }
+  
+  .countdown-label {
+    display: block;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 5px;
+  }
+  
+  .event-details {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .event-info-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.25);
+    padding: 10px 20px;
+    border-radius: 25px;
+    margin: 5px;
+    color: white;
+    font-size: 0.95rem;
+  }
+  
+  .no-featured-event {
+    text-align: center;
+    padding: 40px;
+  }
+  
+  .no-featured-event i {
+    font-size: 4rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .featured-badge-main {
+    display: inline-block;
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #000;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+  }
+  
+  .event-image-main {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+  
+  @media (max-width: 991px) {
+    .hero-title {
+      font-size: 2.5rem;
+    }
+    .countdown-container {
+      margin-top: 30px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid hero-size bg">
+  <div class="container">
+    <div class="row align-items-center h-100">
+      <!-- Columna Izquierda: Texto Hero -->
+      <div class="col-lg-6 col-md-12 hero-content text-center text-lg-start">
+        <p class="hero-subtitle">Conoce a Smart Events</p>
+        <h1 class="hero-title text-white">Tu agenda estudiantil en un solo lugar</h1>
+        <p class="hero-description">Conciertos, charlas y actividades culturales cerca de ti.</p>
+        <div class="hero-buttons">
+          <a href="{% url 'index' %}" class="btn btn-light btn-lg me-lg-3 mb-2 mb-lg-0">
+            <i class="bi bi-calendar-event me-2"></i>Ver Eventos
+          </a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'profile' %}" class="btn btn-outline-light btn-lg">
+              <i class="bi bi-person-circle me-2"></i>Mi Perfil
+            </a>
+          {% else %}
+            <a href="{% url 'signup' %}" class="btn btn-outline-light btn-lg">
+              <i class="bi bi-person-plus me-2"></i>Únete Ahora
+            </a>
+          {% endif %}
+        </div>
+      </div>
+      
+      <!-- Columna Derecha: Evento Destacado -->
+      <div class="col-lg-6 col-md-12 hero-content mt-4 mt-lg-0">
+        {% if featured_event %}
+          <div class="countdown-container">
+            <div class="featured-badge-main">
+              <i class="bi bi-star-fill"></i> EVENTO DESTACADO
+            </div>
+            
+            {% if featured_event.image_base64 %}
+              <img src="{{ featured_event.image_base64 }}" alt="{{ featured_event.event_name }}" class="event-image-main">
+            {% endif %}
+            
+            <h3 class="countdown-title">
+              <i class="bi bi-flag me-2"></i>{{ featured_event.event_name }}
+            </h3>
+            <p class="event-subtitle">
+              {{ featured_event.event_date|date:"d \d\e F \d\e Y" }} - {{ featured_event.starts_at|time:"H:i" }}
+            </p>
+            
+            <!-- Contador dinámico -->
+            <div class="countdown-timer" id="countdown">
+              <div class="countdown-item">
+                <span class="countdown-number" id="days">--</span>
+                <span class="countdown-label">Días</span>
+              </div>
+              <div class="countdown-item">
+                <span class="countdown-number" id="hours">--</span>
+                <span class="countdown-label">Horas</span>
+              </div>
+              <div class="countdown-item">
+                <span class="countdown-number" id="minutes">--</span>
+                <span class="countdown-label">Min</span>
+              </div>
+              <div class="countdown-item">
+                <span class="countdown-number" id="seconds">--</span>
+                <span class="countdown-label">Seg</span>
+              </div>
+            </div>
+            
+            <div class="event-details">
+              <div class="event-info-badge">
+                <i class="bi bi-geo-alt me-1"></i>{{ featured_event.location }}
+              </div>
+              <div class="event-info-badge">
+                <i class="bi bi-tag me-1"></i>
+                {% if featured_event.price == 0 %}
+                  ¡Gratis!
+                {% else %}
+                  ${{ featured_event.price }}
+                {% endif %}
+              </div>
+              {% if featured_event.capacity %}
+                <div class="event-info-badge">
+                  <i class="bi bi-people me-1"></i>{{ featured_event.remaining_slots }} lugares disponibles
+                </div>
+              {% endif %}
+            </div>
+            
+            <div class="mt-4">
+              <a href="{% url 'event_detail' featured_event.id %}" class="btn btn-light btn-lg w-100">
+                <i class="bi bi-info-circle me-2"></i>Ver Detalles e Inscribirme
+              </a>
+            </div>
+          </div>
+        {% else %}
+          <div class="countdown-container no-featured-event">
+            <i class="bi bi-calendar-x"></i>
+            <h3 class="countdown-title mt-3">No hay evento destacado</h3>
+            <p class="event-subtitle">Pronto tendremos eventos increíbles para ti</p>
+            <a href="{% url 'index' %}" class="btn btn-light mt-3">
+              <i class="bi bi-search me-2"></i>Explorar Todos los Eventos
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if featured_event %}
+<script>
+  // Fecha del evento destacado
+  const eventDate = new Date("{{ featured_event.event_date|date:'Y-m-d' }}T{{ featured_event.starts_at|time:'H:i' }}").getTime();
+  
+  function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = eventDate - now;
+    
+    if (distance < 0) {
+      document.getElementById('countdown').innerHTML = '<div class="text-center w-100"><h4 class="text-white">¡El evento ya comenzó!</h4></div>';
+      return;
+    }
+    
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    
+    document.getElementById('days').textContent = String(days).padStart(2, '0');
+    document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+    document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+    document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+  }
+  
+  // Actualizar cada segundo
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+</script>
+{% endif %}
+{% endblock %}
